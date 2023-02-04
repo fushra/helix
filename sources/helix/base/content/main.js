@@ -8,6 +8,12 @@ function startDevtools() {
   BrowserToolboxLauncher.init()
 }
 
+function reload() {
+  window.location.reload()
+}
+
 document
   .getElementById('start-devtools')
   .addEventListener('command', startDevtools)
+
+document.getElementById('reload').addEventListener('command', reload)

@@ -25,6 +25,7 @@ pref("devtools.toolbox.alwaysOnTop", true);
 // - "parent-process" will restrict debugging to the parent process
 //   All privileged javascript, documents and workers running in the parent process.
 pref("devtools.browsertoolbox.scope", "parent-process");
+pref("devtools.browsertoolbox.fission", true);
 
 // This preference will enable watching top-level targets from the server side.
 pref("devtools.target-switching.server.enabled", true);
@@ -353,3 +354,5 @@ pref("devtools.debugger.features.async-live-stacks", false);
 // This is currently not exposed by any UI to avoid making
 // about:devtools-toolbox tabs unusable by mistake.
 pref("devtools.popup.disable_autohide", false);
+
+
