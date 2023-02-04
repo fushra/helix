@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "*.jsm": "javascript",
+    "moz.build": "python",
+    "moz.configure": "python",
+    "app.mozbuild": "python",
+    "Makefile.in": "makefile",
+    "mozconfig": "shellscript"
+  }
+}

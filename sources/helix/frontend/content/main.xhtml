@@ -10,18 +10,7 @@
   width="300"
   height="300"
 >
-  <head>
-    <script>
-      const { Services } = ChromeUtils.import(
-        "resource://gre/modules/Services.jsm"
-      );
-
-      Services.scriptloader.loadSubScript(
-        "chrome://helix/content/main.js",
-        this
-      );
-    </script>
-  </head>
+  <head></head>
 
   <html:body
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -29,11 +18,7 @@
     <description>Hello World</description>
     <separator />
     <button id="show-more" label="More >>" oncommand="showMore()" />
-    <button
-      id="start-devtools"
-      label="Start Devtools"
-      oncommand="startDevtools()"
-    />
+    <button id="start-devtools" label="Start Devtools" />
     <separator />
     <description id="more-text" hidden="true"
       >This is a simple gecko example. It has support for lots of things that
@@ -55,5 +40,7 @@
         <html:li>Click 'Open in Browser Toolbox'</html:li>
       </html:ol>
     </html:div>
+
+    <html:script src="./main.js" type="module"></html:script>
   </html:body>
 </html>

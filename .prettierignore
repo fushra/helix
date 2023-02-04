@@ -1,0 +1,2 @@
+# Pref files need semicolons at the end of each line
+**/app/prefs/*.js
