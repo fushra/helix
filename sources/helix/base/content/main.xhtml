@@ -10,37 +10,20 @@
   width="300"
   height="300"
 >
-  <head></head>
+  <head>
+    <link rel="stylesheet" href="chrome://helix/content/main.css" />
+  </head>
 
   <html:body
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   >
-    <description>Hi</description>
-    <separator />
-    <button id="show-more" label="More >>" oncommand="showMore()" />
-    <button id="start-devtools" label="Start Devtools" />
-    <button id="reload" label="Reload" oncommand="location.reload()" />
-    <separator />
-    <description id="more-text" hidden="true"
-      >This is a simple gecko example. It has support for lots of things that
-      browsers have, from html to (some parts of) webextensions</description
-    >
-
-    <html:div id="devtools-instructions" hidden="true">
-      <html:h2>To connect to the devtools server:</html:h2>
-      <html:ol>
-        <html:li>Open 'about:debugging' in Firefox or Pulse Browser</html:li>
-        <html:li>Open the setup tab</html:li>
-        <html:li
-          >Enter the following host inside of network locations
-          'localhost:<html:span id="devtools-port"></html:span>' and click
-          'Add'</html:li
-        >
-        <html:li>Click 'Connect' in the left sidebar</html:li>
-        <html:li>Click on the entry in the left sidebar</html:li>
-        <html:li>Click 'Open in Browser Toolbox'</html:li>
-      </html:ol>
-    </html:div>
+    <toolbar>
+      <menubar>
+        <menu label="Dev" id="menubar-dev">
+          <menupopup id="menubar-dev-popup"> </menupopup>
+        </menu>
+      </menubar>
+    </toolbar>
 
     <html:script src="./main.js" type="module"></html:script>
   </html:body>
