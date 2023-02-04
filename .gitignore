@@ -13,6 +13,3 @@
 # A default integrations directory.
 /integrations
 /test/integrations
-
-# the default location to configure a project
-/.motherhen-config.json
