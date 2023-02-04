@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022", "dom"],
+    "module": "esnext",
+    "target": "es2022",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "declaration": true,
+    "resolveJsonModule": true,
+    "outDir": "cli",
+
+    "baseUrl": ".",
+    "paths": {
+      "#cli/*": ["./typescript-cli/*"]
+    }
+  },
+
+  "include": [
+    "typescript-cli"
+  ],
+
+  "extends": "@tsconfig/node18/tsconfig.json"
+}
