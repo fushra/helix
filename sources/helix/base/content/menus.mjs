@@ -51,7 +51,7 @@ export function addMenus() {
  */
 function createMenuItem(container, menu) {
   const { label, oncommand } = menu
-  /** @type {HTMLDivElement} */
+  /** @type {HTMLElement} */
   const menuItem = document.createXULElement('menuitem')
 
   menuItem.label = label

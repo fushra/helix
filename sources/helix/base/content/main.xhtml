@@ -20,10 +20,21 @@
     <toolbar>
       <menubar>
         <menu label="Dev" id="menubar-dev">
-          <menupopup id="menubar-dev-popup"> </menupopup>
+          <menupopup id="menubar-dev-popup"></menupopup>
         </menu>
       </menubar>
     </toolbar>
+
+    <hbox id="browser" flex="1">
+      <vbox id="sidebar">
+        <div id="tabs"></div>
+      </vbox>
+      <vbox id="appcontent" flex="1">
+        <tabbox id="tabbox" flex="1">
+          <tabpanels id="tabpanels" flex="1"></tabpanels>
+        </tabbox>
+      </vbox>
+    </hbox>
 
     <html:script src="./main.js" type="module"></html:script>
   </html:body>
