@@ -2,6 +2,7 @@
 
 helix.jar:
 % content helix %content/ contentaccessible=yes
+  content/browser.mjs                 (content/browser.mjs)
   content/main.xhtml                  (content/main.xhtml)
   content/main.js                     (content/main.js)
   content/main.css                    (content/main.css)

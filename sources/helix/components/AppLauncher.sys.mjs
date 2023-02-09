@@ -59,12 +59,18 @@ export class AppLauncher {
         // to an error if the pref is not set, which is what we want
         var chromeURI = prefs.getCharPref('app.content')
 
-        var flags = prefs.getCharPref(
-          'toolkit.defaultChromeFeatures',
-          'chrome,dialog=no,all'
-        )
+        // var flags = prefs.getCharPref(
+        //   'toolkit.defaultChromeFeatures',
+        //   'chrome,dialog=no,all'
+        // )
 
-        wwatch.openWindow(null, chromeURI, '_blank', flags, cmdLine)
+        wwatch.openWindow(
+          null,
+          chromeURI,
+          '_blank',
+          'chrome,all,dialog=no,extrachrome,menubar,resizable,scrollbars,status,location,toolbar,personalbar',
+          cmdLine
+        )
         return
       } catch (e) {}
     }

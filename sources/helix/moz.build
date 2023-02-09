@@ -22,3 +22,9 @@ JS_PREFERENCE_FILES += [
   "app/prefs/app.js",
   "app/prefs/devtools.js",
 ]
+
+# TODO: Figure out what preferences from the firefox.js file we need or strip it
+# down
+JS_PREFERENCE_PP_FILES += [
+  "app/prefs/firefox.js",
+]
