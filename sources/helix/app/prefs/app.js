@@ -18,3 +18,6 @@ pref("browser.tabs.loadDivertedInBackground", false);
 pref("browser.tabs.remote.autostart", true);
 pref("browser.tabs.remote.desktopbehavior", true);
 pref("extensions.webextensions.remote", true);
+
+// Make the browser appear as firefox
+pref("general.useragent.compatMode.firefox", true);

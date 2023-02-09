@@ -1,4 +1,5 @@
 import { E10SUtils } from 'resource://gre/modules/E10SUtils.sys.mjs'
+import { Tab } from './tabs.mjs'
 
 const { NetUtil } = ChromeUtils.import('resource://gre/modules/NetUtil.jsm')
 
@@ -6,6 +7,7 @@ const { NetUtil } = ChromeUtils.import('resource://gre/modules/NetUtil.jsm')
 const tabPanels = document.getElementById('tabpanels')
 
 const DEFAULT_ATTRIBUTES = {
+  flex: '1',
   type: 'content',
   context: 'contentAreaContextMenu',
   tooltip: 'aHTMLTooltip',
@@ -18,9 +20,18 @@ const DEFAULT_ATTRIBUTES = {
 }
 
 export class Browser {
-  /** @type {Map<number, HTMLElement>} */
+  /**
+   * @type {Map<number, HTMLElement>}
+   * @private
+   */
   browsers = new Map()
+  /** @type {Tab[]} */
+  tabs = []
 
+  /**
+   * Creates a browser and adds it to the tab panel
+   * @returns {number} The id of the created browser
+   */
   createBrowser() {
     const container = document.createXULElement('hbox')
     container.setAttribute('flex', '1')
@@ -40,6 +51,10 @@ export class Browser {
 
     this.goto(id, NetUtil.newURI('https://google.com'))
     this.initBrowser(browser)
+
+    this.tabs.push(Tab.createFromBrowser(id))
+
+    return id
   }
 
   /**
@@ -83,5 +98,14 @@ export class Browser {
     )
 
     browser.setAttribute('remoteType', remoteType)
+  }
+
+  /**
+   * Fetches a browser element that corosponds to aspecific
+   * @param {number} id The index of the browser that you are attempting to fetch
+   * @returns {HTMLElement | undefined}
+   */
+  getBrowser(id) {
+    return this.browsers.get(id)
   }
 }

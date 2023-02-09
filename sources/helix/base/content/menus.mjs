@@ -1,6 +1,8 @@
 // @ts-check
 import { BrowserToolboxLauncher } from 'resource://devtools/client/framework/browser-toolbox/Launcher.sys.mjs'
 
+const { NetUtil } = ChromeUtils.import('resource://gre/modules/NetUtil.jsm')
+
 /**
  * @typedef {Object} Menu
  * @property {string} id
@@ -28,6 +30,21 @@ const menus = [
     modifiers: 'accel,shift,alt',
     keyId: 'key_browserToolbox',
     oncommand: () => BrowserToolboxLauncher.init(),
+  },
+  {
+    id: 'dev_aboutConfig',
+    label: 'Open about:config',
+    shortcut: 'C',
+    modifiers: 'accel,shift,alt',
+    keyId: 'key_aboutConfig',
+    oncommand: () =>
+      Services.ww.openWindow(
+        window,
+        'about:config',
+        '_blank',
+        'chrome,all,dialog=no',
+        null
+      ),
   },
 ]
 
