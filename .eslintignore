@@ -1,6 +1,0 @@
-cleanroom/**/*
-cli/**/*
-source/**/*
-sources/**/*
-test/**/*
-jest.config.js

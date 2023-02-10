@@ -1,0 +1,21 @@
+{
+  "name": "Helix",
+  "vendor": "Fushra",
+  "appId": "com.fushra.helix",
+  "binaryName": "helix",
+  "version": {
+    "product": "firefox",
+    "version": "109.0.1"
+  },
+  "buildOptions": {
+    "windowsUseSymbolicLinks": false
+  },
+  "addons": {},
+  "brands": {},
+  "license": {
+    "ignoredFiles": [
+      ".*\\.json"
+    ],
+    "licenseType": "MPL-2.0"
+  }
+}

@@ -1,15 +1,3 @@
-/node_modules
-
-/cli/**/*.mjs.map
-/cli/**/*.d.mts
-/cli/**/*.js.map
-/cli/**/*.d.ts
-
-/cli/__tests__
-
-# A directory for mozilla-unified to live in as a repository with no patches.
-/cleanroom/mozilla-unified
-
-# A default integrations directory.
-/integrations
-/test/integrations
+node_modules
+.gluon
+engine
