@@ -4,7 +4,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-EXTRA_JS_MODULES += ["AppLauncher.sys.mjs"]
+
+EXTRA_COMPONENTS += [
+  "HelixComponents.manifest",
+]
+
+EXTRA_JS_MODULES += [
+  "AppLauncher.sys.mjs",
+  "HelixGlue.jsm",
+]
 
 XPCOM_MANIFESTS += ["components.conf"]
 
+Library("helixcomps")
+FINAL_LIBRARY = "xul"

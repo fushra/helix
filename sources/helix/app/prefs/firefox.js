@@ -696,7 +696,7 @@ pref("browser.privacySegmentation.preferences.show", false);
 pref("browser.sessionhistory.max_entries", 50);
 
 // Built-in default permissions.
-pref("permissions.manager.defaultsUrl", "resource://app/defaults/permissions");
+pref("permissions.manager.defaultsUrl", "");
 
 // Set default fallback values for site permissions we want
 // the user to be able to globally change.

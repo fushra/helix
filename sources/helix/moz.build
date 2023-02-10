@@ -7,8 +7,9 @@
 CONFIGURE_SUBST_FILES += ["installer/Makefile"]
 
 DIRS += [
-  "components",
+  "actors",
   "base",
+  # "components",
   "modules"
 ]
 
@@ -28,3 +29,4 @@ JS_PREFERENCE_FILES += [
 JS_PREFERENCE_PP_FILES += [
   "app/prefs/firefox.js",
 ]
+
