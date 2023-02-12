@@ -1,3 +1,5 @@
+// @ts-check
+
 import { E10SUtils } from 'resource://gre/modules/E10SUtils.sys.mjs'
 import { Tab } from './tabs.mjs'
 
@@ -112,13 +114,58 @@ export class Browser {
   /**
    * Gets an ID from a browser element
    * @param {HTMLElement} browser The browser element that you are attempting to fetch
-   * @return {Tab | null}
+   * @return {Tab | undefined}
    */
   getTabForBrowser(browser) {
     const regex = /browser-el-(\d+)/
     const id = regex.exec(browser.id)?.[1]
-    if (!id) return null
+    if (!id) return
 
-    return this.tabs.find((tab) => tab.browserId === Number(id))
+    return this.getTabForId(Number(id))
+  }
+
+  /**
+   * Returns a tab for a given ID
+   * @param {number} id The tab id
+   * @returns {Tab | undefined}
+   */
+  getTabForId(id) {
+    return this.tabs.find((tab) => tab.browserId === id)
+  }
+
+  getTabIndexForId(id) {
+    return this.tabs.findIndex((tab) => tab.browserId === id)
+  }
+
+  setFocusedTabIndex(index) {
+    tabPanels.selectedIndex = index
+  }
+
+  removeBrowser(id) {
+    const browser = this.browsers.get(id)
+    if (!browser) {
+      console.warn(`Attempted to remove a browser with an id of ${id}`)
+      return
+    }
+
+    const tab = this.getTabForId(id)
+    const tabIndex = this.getTabIndexForId(id)
+    if (!tab) {
+      console.warn(`Attempted to remove a tab with an id of ${id}`)
+      return
+    }
+
+    if (tab.panel) tab.panel.remove()
+    if (tab.browserEl) tab.browserEl.remove()
+    if (tab.tab) tab.tab.remove()
+
+    this.tabs.splice(this.tabs.indexOf(tab), 1)
+    this.browsers.delete(id)
+
+    if (tabIndex === 0) {
+      this.setFocusedTabIndex(0)
+    } else {
+      this.setFocusedTabIndex(tabIndex - 1)
+    }
   }
 }

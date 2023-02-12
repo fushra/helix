@@ -1,4 +1,5 @@
 // @ts-check
+/// <reference path="_global.d.ts" />
 
 /** @type {HTMLElement} */
 const tabPanels = document.getElementById('tabpanels')
@@ -56,6 +57,11 @@ export class Tab {
     return this.tab.querySelector('.title')
   }
 
+  /** @returns {HTMLDivElement?} */
+  get closeIconEl() {
+    return this.tab.querySelector('.close-icon')
+  }
+
   /**
    * @param {number} id The browser ID
    * @private
@@ -75,10 +81,11 @@ export class Tab {
       this.setPageTitle()
     )
     this.tab.addEventListener('click', this.tabClick.bind(this))
+    this.closeIconEl?.addEventListener('click', this.close.bind(this))
   }
 
   tabClick() {
-    setFocusedTab(this.tabPanelIndex)
+    window.gBrowser.setFocusedTabIndex(this.tabPanelIndex)
   }
 
   setPageTitle() {
@@ -90,8 +97,12 @@ export class Tab {
    * @param {string} originalURL
    */
   setIcon(iconURL, originalURL) {
-    console.log({ iconURL, originalURL })
     this.iconEl?.setAttribute('src', iconURL)
+  }
+
+  close() {
+    console.log('close', this.browserId)
+    window.gBrowser.removeBrowser(this.browserId)
   }
 
   // ===========================================================================
