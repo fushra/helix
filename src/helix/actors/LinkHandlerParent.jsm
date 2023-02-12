@@ -1,13 +1,23 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @ts-check
+///<reference path="../base/content/_global.d.ts" />
 
-export class LinkHandlerParent extends JSWindowActorParent {
+'use strict'
+
+const EXPORTED_SYMBOLS = ['LinkHandlerParent']
+
+const lazy = {}
+
+class LinkHandlerParent extends JSWindowActorParent {
   receiveMessage(aMsg) {
     let browser = this.browsingContext.top.embedderElement
     if (!browser) {
-      console.warn('LinkHandlerParent received a message from a non-browser')
       return
     }
 
+    /** @type {Window} */
     let win = browser.ownerGlobal
 
     let gBrowser = win.gBrowser
@@ -20,12 +30,9 @@ export class LinkHandlerParent extends JSWindowActorParent {
 
         if (aMsg.data.canUseForTab) {
           let tab = gBrowser.getTabForBrowser(browser)
-          if (tab.hasAttribute('busy')) {
-            tab.setAttribute('pendingicon', 'true')
-          }
+          if (tab) tab.busy = true
         }
 
-        // this.notifyTestListeners('LoadingIcon', aMsg.data)
         break
 
       case 'Link:SetIcon':
@@ -41,44 +48,48 @@ export class LinkHandlerParent extends JSWindowActorParent {
         }
 
         this.setIconFromLink(gBrowser, browser, aMsg.data)
-
-        // this.notifyTestListeners('SetIcon', aMsg.data)
         break
 
-      // case 'Link:SetFailedIcon':
-      //   if (!gBrowser) {
-      //     return
-      //   }
+      case 'Link:SetFailedIcon':
+        if (!gBrowser) {
+          return
+        }
 
-      //   if (aMsg.data.canUseForTab) {
-      //     this.clearPendingIcon(gBrowser, browser)
-      //   }
+        if (aMsg.data.canUseForTab) {
+          this.clearPendingIcon(gBrowser, browser)
+        }
+        break
 
-      //   this.notifyTestListeners('SetFailedIcon', aMsg.data)
-      //   break
+      case 'Link:AddSearch':
+        if (!gBrowser) {
+          return
+        }
 
-      // case 'Link:AddSearch':
-      //   if (!gBrowser) {
-      //     return
-      //   }
+        let tab = gBrowser.getTabForBrowser(browser)
+        if (!tab) {
+          break
+        }
 
-      //   let tab = gBrowser.getTabForBrowser(browser)
-      //   if (!tab) {
-      //     break
-      //   }
-
-      //   if (win.BrowserSearch) {
-      //     win.BrowserSearch.addEngine(browser, aMsg.data.engine)
-      //   }
-      //   break
+        if (win.BrowserSearch) {
+          win.BrowserSearch.addEngine(browser, aMsg.data.engine)
+        }
+        break
     }
   }
 
+  /**
+   * @param {typeof window.gBrowser} gBrowser The global gBrowser object
+   * @param {HTMLElement} aBrowser The browser element
+   */
   clearPendingIcon(gBrowser, aBrowser) {
     let tab = gBrowser.getTabForBrowser(aBrowser)
-    tab.removeAttribute('pendingicon')
+    if (tab) tab.busy = false
   }
 
+  /**
+   * @param {import('../base/content/browser.mjs').Browser} gBrowser The global gBrowser object
+   * @param {HTMLElement} browser The browser element
+   */
   setIconFromLink(
     gBrowser,
     browser,
@@ -111,23 +122,9 @@ export class LinkHandlerParent extends JSWindowActorParent {
         return
       }
     }
-    // if (canStoreIcon) {
-    //   try {
-    //     lazy.PlacesUIUtils.loadFavicon(
-    //       browser,
-    //       Services.scriptSecurityManager.getSystemPrincipal(),
-    //       Services.io.newURI(pageURL),
-    //       Services.io.newURI(originalURL),
-    //       expiration,
-    //       iconURI
-    //     )
-    //   } catch (ex) {
-    //     console.error(ex)
-    //   }
-    // }
 
     if (canUseForTab) {
-      gBrowser.setIcon(tab, iconURL, originalURL)
+      tab.setIcon(iconURL, originalURL)
     }
   }
 }

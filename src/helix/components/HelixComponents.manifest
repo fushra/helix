@@ -1,9 +1,9 @@
-# HelixGlue.jsm
+# HelixGlue.sys.mjs
 
 # This component must restrict its registration for the app-startup category
 # to the specific list of apps that use it so it doesn't get loaded in xpcshell.
 # Thus we restrict it to these apps:
 #
-#   helix:          {29442d8b-c0f7-4829-8646-bad51cdcd6ff}
+#   helix:          {a5d56a92-a287-42b3-8149-719a8b9eb060}
 
-category app-startup HelixGlue @fushra.com/helix/helixglue;1 application={29442d8b-c0f7-4829-8646-bad51cdcd6ff}
+category app-startup HelixGlue @fushra.com/helix/helixglue;1 application={a5d56a92-a287-42b3-8149-719a8b9eb060}

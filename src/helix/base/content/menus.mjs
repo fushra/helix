@@ -1,7 +1,9 @@
 // @ts-check
 import { BrowserToolboxLauncher } from 'resource://devtools/client/framework/browser-toolbox/Launcher.sys.mjs'
 
-const { NetUtil } = ChromeUtils.import('resource://gre/modules/NetUtil.jsm')
+function openWindow(url) {
+  Services.ww.openWindow(window, url, '_blank', 'chrome,all,dialog=no', null)
+}
 
 /**
  * @typedef {Object} Menu
@@ -37,14 +39,15 @@ const menus = [
     shortcut: 'C',
     modifiers: 'accel,shift,alt',
     keyId: 'key_aboutConfig',
-    oncommand: () =>
-      Services.ww.openWindow(
-        window,
-        'about:config',
-        '_blank',
-        'chrome,all,dialog=no',
-        null
-      ),
+    oncommand: () => openWindow('about:config'),
+  },
+  {
+    id: 'dev_aboutCrashes',
+    label: 'Open about:crashes',
+    shortcut: 'A',
+    modifiers: 'accel,shift,alt',
+    keyId: 'key_aboutCrashes',
+    oncommand: () => openWindow('about:crashes'),
   },
 ]
 

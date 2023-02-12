@@ -5,7 +5,7 @@
 
 include('/toolkit/toolkit.mozbuild')
 
-DIRS += ["/helix/components"]
+# DIRS += ["/helix/components"]
 
 DIRS += [
     "/helix"

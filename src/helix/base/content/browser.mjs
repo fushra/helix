@@ -108,4 +108,17 @@ export class Browser {
   getBrowser(id) {
     return this.browsers.get(id)
   }
+
+  /**
+   * Gets an ID from a browser element
+   * @param {HTMLElement} browser The browser element that you are attempting to fetch
+   * @return {Tab | null}
+   */
+  getTabForBrowser(browser) {
+    const regex = /browser-el-(\d+)/
+    const id = regex.exec(browser.id)?.[1]
+    if (!id) return null
+
+    return this.tabs.find((tab) => tab.browserId === Number(id))
+  }
 }

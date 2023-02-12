@@ -20,6 +20,12 @@ export class Tab {
   /** @type {Element} */
   tab
 
+  /**
+   * If the tab is loading a page
+   * @type {boolean}
+   */
+  busy = true
+
   /** @return {HTMLElement | undefined} */
   get browserEl() {
     return window.gBrowser.getBrowser(this.browserId)
@@ -39,6 +45,10 @@ export class Tab {
   /** @return {string} */
   get title() {
     return this.browserEl?.contentTitle
+  }
+
+  get iconEl() {
+    return this.tab.querySelector('.tab-icon')
   }
 
   /** @returns {HTMLDivElement?} */
@@ -73,6 +83,15 @@ export class Tab {
 
   setPageTitle() {
     this.titleEl.innerHTML = this.title
+  }
+
+  /**
+   * @param {string} iconURL
+   * @param {string} originalURL
+   */
+  setIcon(iconURL, originalURL) {
+    console.log({ iconURL, originalURL })
+    this.iconEl?.setAttribute('src', iconURL)
   }
 
   // ===========================================================================

@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "build": "gluon build",
+    "start": "gluon run",
+    "imp": "gluon import"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "gecko-types": "github:quark-platform/gecko-types",
     "gluon-build": "1.0.0-rc.5"
   }
 }

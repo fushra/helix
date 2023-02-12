@@ -124,6 +124,7 @@ int main(int argc, char *argv[], char *envp[])
         nsresult rv = InitXPCOMGlue(LibLoadingStrategy::NoReadAhead);
         if (NS_FAILED(rv))
         {
+            printf("Couldn't load XPCOM.\n");
             return 255;
         }
 
@@ -210,6 +211,7 @@ int main(int argc, char *argv[], char *envp[])
         nsresult rv = InitXPCOMGlue(LibLoadingStrategy::NoReadAhead);
         if (NS_FAILED(rv))
         {
+            printf("InitXPCOMGlue failed\n");
             return 255;
         }
 
@@ -222,6 +224,7 @@ int main(int argc, char *argv[], char *envp[])
         // InitXPCOMGlue calls NS_LogInit, so we need to balance it here.
         gBootstrap->NS_LogTerm();
 
+        printf("Exiting content process");
         return result;
     }
 #endif

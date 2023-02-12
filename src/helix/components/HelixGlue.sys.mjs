@@ -1,4 +1,8 @@
-var EXPORTED_SYMBOLS = ['HelixGlue']
+const lazy = {}
+
+ChromeUtils.defineESModuleGetters(lazy, {
+  ActorManagerParent: 'resource://gre/modules/ActorManagerParent.sys.mjs',
+})
 
 const JS_PROCESS_ACTORS = {}
 
@@ -19,16 +23,22 @@ const JS_WINDOW_ACTORS = {
         pagehide: { createActor: false },
       },
     },
-
     messageManagerGroups: ['browsers'],
   },
 }
 
-function HelixGlue() {
-  console.log('Browser glue')
+export class HelixGlue {
+  QueryInterface = ChromeUtils.generateQI([Ci.nsIObserver])
 
-  lazy.ActorManagerParent.addJSProcessActors(JS_PROCESS_ACTORS)
-  lazy.ActorManagerParent.addJSWindowActors(JS_WINDOW_ACTORS)
+  constructor() {
+    console.log('Browser glue')
+
+    lazy.ActorManagerParent.addJSProcessActors(JS_PROCESS_ACTORS)
+    lazy.ActorManagerParent.addJSWindowActors(JS_WINDOW_ACTORS)
+  }
+
+  // nsIObserver impl
+  observe(subject, topic, data) {
+    console.log({ subject, topic, data })
+  }
 }
-
-HelixGlue.prototype = {}
