@@ -54,7 +54,8 @@ export class Browser {
     this.goto(id, NetUtil.newURI('https://google.com'))
     this.initBrowser(browser)
 
-    this.tabs.push(Tab.createFromBrowser(id))
+    const tab = Tab.createFromBrowser(id)
+    if (tab) this.tabs.push(tab)
 
     return id
   }
@@ -65,7 +66,7 @@ export class Browser {
    * @param {nsIURIType} uri The URI to navigate to
    * @param {*} options The options to pass into `loadURI`
    */
-  goto(id, uri, options) {
+  goto(id, uri, options = {}) {
     const browser = this.browsers.get(id)
     if (!browser) {
       console.warn(
@@ -137,22 +138,31 @@ export class Browser {
     return this.tabs.findIndex((tab) => tab.browserId === id)
   }
 
+  /**
+   * Sets the focused tab index
+   * @param {string | number} index The tab of the index
+   */
   setFocusedTabIndex(index) {
     tabPanels.selectedIndex = index
   }
 
+  /**
+   * Removes a browser from the browser list
+   * @param {number} id The id of the browser to remove
+   * @returns {boolean} Early if the browser does not exist
+   */
   removeBrowser(id) {
     const browser = this.browsers.get(id)
     if (!browser) {
       console.warn(`Attempted to remove a browser with an id of ${id}`)
-      return
+      return false
     }
 
     const tab = this.getTabForId(id)
     const tabIndex = this.getTabIndexForId(id)
     if (!tab) {
       console.warn(`Attempted to remove a tab with an id of ${id}`)
-      return
+      return false
     }
 
     if (tab.panel) tab.panel.remove()
@@ -167,5 +177,7 @@ export class Browser {
     } else {
       this.setFocusedTabIndex(tabIndex - 1)
     }
+
+    return true
   }
 }

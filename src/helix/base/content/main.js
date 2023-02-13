@@ -7,4 +7,7 @@ addMenus()
 
 window.gBrowser = new Browser()
 window.gBrowser.createBrowser()
-window.gBrowser.createBrowser()
+
+document
+  .getElementById('new-tab')
+  .addEventListener('click', () => window.gBrowser.createBrowser())

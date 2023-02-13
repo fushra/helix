@@ -12,6 +12,7 @@
 >
   <head>
     <link rel="stylesheet" href="chrome://helix/content/main.css" />
+    <link rel="stylesheet" href="chrome://helix/content/utils.css" />
     <link
       rel="stylesheet"
       href="chrome://helix/content/lib/remix/remixicon.css"
@@ -30,9 +31,12 @@
     </toolbar>
 
     <hbox id="browser" flex="1">
-      <vbox id="sidebar">
+      <html:div id="sidebar">
         <div id="tabs"></div>
-      </vbox>
+        <html:button id="new-tab">
+          <i class="ri-add-line ri-1x inline" />
+        </html:button>
+      </html:div>
 
       <splitter resizebefore="sibling" />
 

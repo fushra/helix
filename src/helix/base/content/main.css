@@ -15,10 +15,19 @@ body {
 }
 
 /* ========================================================================== */
+/* Sidebar styling */
+
+#sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================================================== */
 /* Tab styling */
 
 #tabs {
   display: block;
+  flex-grow: 2;
 }
 
 #tabs .tab {

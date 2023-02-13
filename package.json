@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "gluon build",
+    "build:ui": "gluon build --ui",
     "start": "gluon run",
     "imp": "gluon import"
   },
