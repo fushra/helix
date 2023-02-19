@@ -11,7 +11,7 @@ const lazy = {}
 ChromeUtils.defineModuleGetter(
   lazy,
   'FaviconLoader',
-  'resource:///modules/FaviconLoader.jsm'
+  'resource://app/modules/FaviconLoader.jsm'
 )
 
 class LinkHandlerChild extends JSWindowActorChild {

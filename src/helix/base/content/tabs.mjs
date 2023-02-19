@@ -1,22 +1,17 @@
 // @ts-check
 /// <reference path="_global.d.ts" />
 
+import { browserController } from './browser.mjs'
+
 /** @type {HTMLElement} */
 const tabPanels = document.getElementById('tabpanels')
 const tabsContainer = document.getElementById('tabs')
 /** @type {HTMLTemplateElement} */
 const tabTemplate = document.getElementById('tab_template')
 
-/**
- * @param {number} index The index of the tab that you want to focus
- */
-function setFocusedTab(index) {
-  tabPanels.selectedIndex = index.toString()
-}
-
 export class Tab {
   /** @type {number} */
-  browserId
+  id
 
   /** @type {Element} */
   tab
@@ -27,13 +22,14 @@ export class Tab {
    */
   busy = true
 
-  /** @return {HTMLElement | undefined} */
-  get browserEl() {
-    return window.gBrowser.getBrowser(this.browserId)
-  }
+  /**
+   * The browser element that is bound to this tab
+   * @type {HTMLElement?}
+   */
+  browser
 
   get panel() {
-    return this.browserEl?.parentElement
+    return this.browser?.parentElement
   }
 
   /**
@@ -45,7 +41,7 @@ export class Tab {
 
   /** @return {string} */
   get title() {
-    return this.browserEl?.contentTitle
+    return this.browser?.contentTitle
   }
 
   get iconEl() {
@@ -63,11 +59,14 @@ export class Tab {
   }
 
   /**
-   * @param {number} id The browser ID
+   * @param {object} config The options to create the browser with
+   * @param {number} config.id The browser ID
+   * @param {*} [config.browser] The browser element
    * @private
    */
-  constructor(id) {
-    this.browserId = id
+  constructor({ id, browser }) {
+    this.id = id
+    this.browser = browser
 
     const tab =
       /** @type {DocumentFragment} */
@@ -77,7 +76,7 @@ export class Tab {
     console.log(this.titleEl)
     this.titleEl.innerHTML = this.title
 
-    this.browserEl?.addEventListener('pagetitlechanged', (e) =>
+    this.browser?.addEventListener('pagetitlechanged', (e) =>
       this.setPageTitle()
     )
     this.tab.addEventListener('click', this.tabClick.bind(this))
@@ -85,7 +84,7 @@ export class Tab {
   }
 
   tabClick() {
-    window.gBrowser.setFocusedTabIndex(this.tabPanelIndex)
+    browserController.selectTab(this.id)
   }
 
   setPageTitle() {
@@ -101,25 +100,44 @@ export class Tab {
   }
 
   close() {
-    console.log('close', this.browserId)
-    window.gBrowser.removeBrowser(this.browserId)
+    browserController.removeTab(this.id)
+  }
+
+  /**
+   * Sets the location of a specific tab
+   * @param {object} config The config parameters
+   * @param {string} config.url The URL that the browser should navigate to
+   * @param {object} [config.loadURIOptions] Options to be passed down into loadURI
+   */
+  goto({ url, loadURIOptions }) {
+    if (!loadURIOptions) loadURIOptions = {}
+    if (!loadURIOptions.triggeringPrincipal)
+      loadURIOptions.triggeringPrincipal =
+        Services.scriptSecurityManager.getSystemPrincipal()
+
+    if (!this.browser) {
+      console.warn(
+        `goto was called before the browser with id of ${this.id} was initialized`
+      )
+      return
+    }
+
+    this.browser.loadURI(url, loadURIOptions)
   }
 
   // ===========================================================================
   // Static init methods
 
   /**
-   * Creates a tab that is assosiated with the tab
-   * @param {number} id The id of the browser
+   * Creates a tab that is associated with a specific browser
+   * @param {object} config The config for the tab to be created
+   * @param {number} config.id The id of the tab
+   * @param {*} [config.browser] The browser element
+   *
+   * @returns {Tab}
+   * @todo Do I really need this function? Can I replace it with a public constructor?
    */
-  static createFromBrowser(id) {
-    const browser = window.gBrowser.getBrowser(id)
-
-    if (!browser) {
-      console.error('The browser id passed into `createFromBrowser` is invalid')
-      return
-    }
-
-    return new Tab(id)
+  static createFromBrowser({ id, browser }) {
+    return new Tab({ id, browser })
   }
 }

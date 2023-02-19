@@ -2,6 +2,62 @@
   height: 100%;
 }
 
+/* TODO: Theming support */
+/**
+ * The colors and the way they are structured are stolen from catppucin. The
+ * names have been tweaked to be a bit more formal, but try to follow this style
+ * guide for their usage. The original names should be noted next to the 
+ * variables: 
+ * https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md
+ */
+:root {
+  --root-0: #eff1f5; /* Base */
+  --root-1: #e6e9ef; /* Mantle */
+  --root-2: #dce0e8; /* Crust */
+
+  --surface-0: #ccd0da;
+  --surface-1: #bcc0cc;
+  --surface-2: #acb0be;
+
+  --overlay-0: #9ca0b0;
+  --overlay-1: #8c8fa1;
+  --overlay-2: #7c7f93;
+
+  --text: #4c4f69;
+  --subtext-1: #5c5f77;
+  --subtext-2: #6c6f85;
+
+  --primary-1: #e3e7ff;
+  --primary-2: #c7cffe;
+  --primary-3: #aab7fe;
+  --primary-4: #8e9ffd;
+  --primary-5: #3654fc;
+  --primary-6: #0327f1;
+  --primary-7: #031eb5;
+  --primary-8: #021479;
+  --primary-9: #010a3c;
+
+  --warn-1: #f9e8d1;
+  --warn-2: #f3d2a4;
+  --warn-3: #edbb76;
+  --warn-4: #e7a548;
+  --warn-5: #ba7618;
+  --warn-6: #955f13;
+  --warn-7: #70470f;
+  --warn-8: #4a2f0a;
+  --warn-9: #251805;
+
+  --error-1: #fadadd;
+  --error-2: #f5b5ba;
+  --error-3: #f08f98;
+  --error-4: #eb6a75;
+  --error-5: #dc1e2e;
+  --error-6: #b01825;
+  --error-7: #84121c;
+  --error-8: #580c12;
+  --error-9: #2c0609;
+}
+
 body {
   margin: 0;
 
@@ -12,6 +68,8 @@ body {
   width: 100%;
   height: 100%;
   overflow: clip;
+
+  background-color: var(--root-0);
 }
 
 /* ========================================================================== */
@@ -20,6 +78,34 @@ body {
 #sidebar {
   display: flex;
   flex-direction: column;
+}
+
+/* ========================================================================== */
+/* omnibox */
+
+#omnibox {
+  background-color: var(--surface-0);
+
+  margin: 4px;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+#omnibox:focus {
+  outline: var(--primary-4) 2px;
+}
+
+#omnibox__text-input {
+  border: none;
+  background: none;
+  border-radius: none;
+  margin: 0;
+
+  color: var(--text);
+}
+
+#omnibox__text-input:focus {
+  outline: none;
 }
 
 /* ========================================================================== */
@@ -32,6 +118,15 @@ body {
 
 #tabs .tab {
   display: flex;
+  color: var(--text);
+}
+
+#tabs .tab:hover {
+  background-color: var(--surface-0);
+}
+
+.tab--selected {
+  background-color: var(--surface-1);
 }
 
 #tabs .tab-icon,
@@ -45,4 +140,8 @@ body {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+
+#tabpanels {
+  padding: 0;
 }

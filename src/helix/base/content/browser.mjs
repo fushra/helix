@@ -1,12 +1,9 @@
+///<reference path="./_global.d.ts" />
 // @ts-check
 
+import { Event } from 'resource://app/modules/Event.sys.mjs'
 import { E10SUtils } from 'resource://gre/modules/E10SUtils.sys.mjs'
 import { Tab } from './tabs.mjs'
-
-const { NetUtil } = ChromeUtils.import('resource://gre/modules/NetUtil.jsm')
-
-/** @type {HTMLElement} */
-const tabPanels = document.getElementById('tabpanels')
 
 const DEFAULT_ATTRIBUTES = {
   flex: '1',
@@ -21,19 +18,73 @@ const DEFAULT_ATTRIBUTES = {
   maychangeremoteness: true,
 }
 
-export class Browser {
-  /**
-   * @type {Map<number, HTMLElement>}
-   * @private
-   */
-  browsers = new Map()
-  /** @type {Tab[]} */
-  tabs = []
+export class BrowserController {
+  /** @private */
+  tabsView = new TabsView()
+
+  /** @private */
+  tabsModel = new TabsModel()
+
+  constructor() {
+    this.tabsView.createdBrowserEvent.addListener(({ browser }) =>
+      this.tabsModel.initializeTab({ browser, url: 'https://google.com' })
+    )
+
+    this.tabsModel.tabRemovedEvent.addListener(({ tab }) =>
+      this.tabsView.removeTab(tab)
+    )
+    this.tabsModel.tabSelectedEvent.addListener(({ id }) => {
+      const tab = this.tabsModel.tabs.get(id)
+      if (!tab) return
+
+      this.tabsView.updateSelectedTab(tab)
+    })
+  }
 
   /**
-   * Creates a browser and adds it to the tab panel
-   * @returns {number} The id of the created browser
+   * @param {number} id The id of the tab you wish to remove
    */
+  removeTab(id) {
+    this.tabsModel.removeTab(id)
+  }
+
+  /**
+   * @param {number} id The id of the tab you wish to select
+   */
+  selectTab(id) {
+    this.tabsModel.selectTab(id)
+  }
+}
+
+export class TabsView {
+  // ===========================================================================
+  // Data
+
+  /** @type {HTMLElement} */
+  tabPanels = document.getElementById('tabpanels')
+
+  /** @type {HTMLDivElement} */
+  tabs = document.getElementById('tabs')
+
+  // ===========================================================================
+  // Events
+
+  /**
+   * Called when a new browser is created. e.g. When the new tab button is
+   * pressed
+   * @type {Event<{ browser: MozBrowserElement }>}
+   */
+  createdBrowserEvent = new Event()
+
+  // ===========================================================================
+  // Logic
+
+  constructor() {
+    document
+      .getElementById('new-tab')
+      ?.addEventListener('click', () => this.createBrowser())
+  }
+
   createBrowser() {
     const container = document.createXULElement('hbox')
     container.setAttribute('flex', '1')
@@ -44,50 +95,11 @@ export class Browser {
       browser.setAttribute(key, DEFAULT_ATTRIBUTES[key])
 
     container.appendChild(browser)
-    tabPanels.appendChild(container)
+    this.tabPanels.appendChild(container)
 
     const { browserId: id } = browser
-
-    this.browsers.set(id, browser)
     browser.id = `browser-el-${id}`
 
-    this.goto(id, NetUtil.newURI('https://google.com'))
-    this.initBrowser(browser)
-
-    const tab = Tab.createFromBrowser(id)
-    if (tab) this.tabs.push(tab)
-
-    return id
-  }
-
-  /**
-   * Loads a specific URI in a browser
-   * @param {number} id The browser id. This is a key in {@link this.browsers}
-   * @param {nsIURIType} uri The URI to navigate to
-   * @param {*} options The options to pass into `loadURI`
-   */
-  goto(id, uri, options = {}) {
-    const browser = this.browsers.get(id)
-    if (!browser) {
-      console.warn(
-        '`goto` was called on an unregistered browser with an id of',
-        id
-      )
-      return
-    }
-
-    const triggeringPrincipal =
-      options && options.triggeringPrincipal
-        ? options.triggeringPrincipal
-        : Services.scriptSecurityManager.getSystemPrincipal()
-
-    browser.loadURI(uri.spec, { triggeringPrincipal, ...options })
-  }
-
-  /**
-   * @private
-   */
-  initBrowser(browser) {
     let oa = E10SUtils.predictOriginAttributes({ browser })
 
     const { useRemoteTabs } = window.docShell.QueryInterface(Ci.nsILoadContext)
@@ -99,85 +111,128 @@ export class Browser {
       null,
       oa
     )
-
     browser.setAttribute('remoteType', remoteType)
+
+    this.createdBrowserEvent.trigger({ browser })
   }
 
   /**
-   * Fetches a browser element that corosponds to aspecific
-   * @param {number} id The index of the browser that you are attempting to fetch
-   * @returns {HTMLElement | undefined}
+   * @param {Tab} tab The tab to remove
    */
-  getBrowser(id) {
-    return this.browsers.get(id)
+  removeTab(tab) {
+    tab.browser?.remove()
+    tab.panel?.remove()
+    tab.tab.remove()
   }
 
   /**
-   * Gets an ID from a browser element
-   * @param {HTMLElement} browser The browser element that you are attempting to fetch
-   * @return {Tab | undefined}
+   * This makes sure that only one tab in the sidebar is selected and sets the
+   * correct index in the browser stack
+   *
+   * @param {Tab} tab The tab to select
    */
-  getTabForBrowser(browser) {
-    const regex = /browser-el-(\d+)/
-    const id = regex.exec(browser.id)?.[1]
-    if (!id) return
-
-    return this.getTabForId(Number(id))
-  }
-
-  /**
-   * Returns a tab for a given ID
-   * @param {number} id The tab id
-   * @returns {Tab | undefined}
-   */
-  getTabForId(id) {
-    return this.tabs.find((tab) => tab.browserId === id)
-  }
-
-  getTabIndexForId(id) {
-    return this.tabs.findIndex((tab) => tab.browserId === id)
-  }
-
-  /**
-   * Sets the focused tab index
-   * @param {string | number} index The tab of the index
-   */
-  setFocusedTabIndex(index) {
-    tabPanels.selectedIndex = index
-  }
-
-  /**
-   * Removes a browser from the browser list
-   * @param {number} id The id of the browser to remove
-   * @returns {boolean} Early if the browser does not exist
-   */
-  removeBrowser(id) {
-    const browser = this.browsers.get(id)
-    if (!browser) {
-      console.warn(`Attempted to remove a browser with an id of ${id}`)
-      return false
+  updateSelectedTab(tab) {
+    for (const child of this.tabs.children) {
+      child.classList.remove('tab--selected')
     }
 
-    const tab = this.getTabForId(id)
-    const tabIndex = this.getTabIndexForId(id)
-    if (!tab) {
-      console.warn(`Attempted to remove a tab with an id of ${id}`)
-      return false
+    tab.tab.classList.add('tab--selected')
+
+    const browserElement = tab.browser
+    const browserContainer = browserElement?.parentElement
+
+    if (browserContainer) {
+      const browserIndex = Array.from(this.tabPanels.childNodes).indexOf(
+        browserContainer
+      )
+
+      this.tabPanels.selectedIndex = browserIndex
     }
-
-    if (tab.panel) tab.panel.remove()
-    if (tab.browserEl) tab.browserEl.remove()
-    if (tab.tab) tab.tab.remove()
-
-    this.tabs.splice(this.tabs.indexOf(tab), 1)
-    this.browsers.delete(id)
-
-    if (tabIndex === 0) {
-      this.setFocusedTabIndex(0)
-    } else {
-      this.setFocusedTabIndex(tabIndex - 1)
-    }
-
-    return true
   }
 }
+
+export class TabsModel {
+  // ===========================================================================
+  // Data
+
+  /** @type {Map<number, Tab>} */
+  tabs = new Map()
+
+  /** @type {number} */
+  selectedTab = 0
+
+  // ===========================================================================
+  // Events
+
+  /**
+   * Called when a tab is created. Includes the ID of the tab
+   * @type {Event<{ id: number }>}
+   */
+  tabInitializedEvent = new Event()
+
+  /**
+   * Triggered whenever a tab is removed, includes the {@link Tab} as it will
+   * have already been removed from {@link this.tabs} and the UI
+   * @type {Event<{ tab: Tab }>}
+   */
+  tabRemovedEvent = new Event()
+
+  /**
+   * Triggered whenever a tab is selected. No UI updates will have been
+   * performed when it is initially triggered
+   * @type {Event<{ id: number }>}
+   */
+  tabSelectedEvent = new Event()
+
+  // ===========================================================================
+  // Logic
+
+  /**
+   * Creates a new tab and adds it to the window
+   * @param {object} config The config parameters for the new tab
+   * @param {HTMLBrowserElement} config.browser The browser element for the tab
+   * @param {string} [config.url] The url that the new tab should open. Defaults to `about:blank`
+   * @returns {number} The id of the associated {@link Tab}
+   */
+  initializeTab({ browser, url }) {
+    if (!url) url = 'about:blank'
+
+    const { browserId: id } = browser
+    const tab = Tab.createFromBrowser({ id, browser })
+    tab.goto({ url })
+    this.tabs.set(id, tab)
+
+    this.tabInitializedEvent.trigger({ id })
+
+    if (this.tabs.size == 1) this.selectTab(id)
+    return id
+  }
+
+  /**
+   * Removes a tab from the browser model & the UI
+   *
+   * @param {number} id The id of the Tab you wish to remove
+   * @returns Early if the does not exist in {@link this.tabs}
+   */
+  removeTab(id) {
+    const tab = this.tabs.get(id)
+
+    if (!tab) {
+      console.warn(`Attempted to remove tab that didn't exist (tab id ${id})`)
+      return
+    }
+
+    this.tabs.delete(id)
+    this.tabRemovedEvent.trigger({ tab })
+  }
+
+  /**
+   * @param {number} id The id of the tab that needs to be selected
+   */
+  selectTab(id) {
+    this.selectedTab = id
+    this.tabSelectedEvent.trigger({ id })
+  }
+}
+
+export const browserController = new BrowserController()

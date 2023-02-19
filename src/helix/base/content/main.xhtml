@@ -7,8 +7,6 @@
   xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns="http://www.w3.org/1999/xhtml"
   title="MyApp"
-  width="300"
-  height="300"
 >
   <head>
     <link rel="stylesheet" href="chrome://helix/content/main.css" />
@@ -32,7 +30,11 @@
 
     <hbox id="browser" flex="1">
       <html:div id="sidebar">
-        <div id="tabs"></div>
+        <html:div id="omnibox">
+          <html:input type="text" id="omnibox__text-input" />
+        </html:div>
+
+        <html:div id="tabs"></html:div>
         <html:button id="new-tab">
           <i class="ri-add-line ri-1x inline" />
         </html:button>
