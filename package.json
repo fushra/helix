@@ -7,7 +7,8 @@
     "build": "gluon build",
     "build:ui": "gluon build --ui",
     "start": "gluon run",
-    "imp": "gluon import"
+    "imp": "gluon import",
+    "download": "gluon download"
   },
   "keywords": [],
   "author": "",

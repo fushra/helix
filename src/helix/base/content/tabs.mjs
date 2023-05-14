@@ -1,6 +1,7 @@
+///<reference path="./_global.d.ts" />
 // @ts-check
-/// <reference path="_global.d.ts" />
 
+import { Event } from 'resource://app/modules/Event.sys.mjs'
 import { browserController } from './browser.mjs'
 
 /** @type {HTMLElement} */
@@ -10,17 +11,14 @@ const tabsContainer = document.getElementById('tabs')
 const tabTemplate = document.getElementById('tab_template')
 
 export class Tab {
+  /**
+   * @private
+   * @type {TabView}
+   */
+  tabView
+
   /** @type {number} */
   id
-
-  /** @type {Element} */
-  tab
-
-  /**
-   * If the tab is loading a page
-   * @type {boolean}
-   */
-  busy = true
 
   /**
    * The browser element that is bound to this tab
@@ -28,34 +26,16 @@ export class Tab {
    */
   browser
 
-  get panel() {
-    return this.browser?.parentElement
-  }
-
-  /**
-   * @returns {number}
-   */
-  get tabPanelIndex() {
-    return Array.from(tabPanels.children).indexOf(this.panel)
-  }
+  // /**
+  //  * @returns {number}
+  //  */
+  // get tabPanelIndex() {
+  //   return Array.from(tabPanels.children).indexOf(this.panel)
+  // }
 
   /** @return {string} */
   get title() {
     return this.browser?.contentTitle
-  }
-
-  get iconEl() {
-    return this.tab.querySelector('.tab-icon')
-  }
-
-  /** @returns {HTMLDivElement?} */
-  get titleEl() {
-    return this.tab.querySelector('.title')
-  }
-
-  /** @returns {HTMLDivElement?} */
-  get closeIconEl() {
-    return this.tab.querySelector('.close-icon')
   }
 
   /**
@@ -67,40 +47,25 @@ export class Tab {
   constructor({ id, browser }) {
     this.id = id
     this.browser = browser
+    this.tabView = new TabView(browser)
 
-    const tab =
-      /** @type {DocumentFragment} */
-      (tabTemplate?.content.cloneNode(true)).children[0]
-    tabsContainer?.appendChild(tab)
-    this.tab = tab
-    console.log(this.titleEl)
-    this.titleEl.innerHTML = this.title
+    this.setupEventListeners()
+  }
 
-    this.browser?.addEventListener('pagetitlechanged', (e) =>
-      this.setPageTitle()
+  setupEventListeners() {
+    this.tabView.tabFocusEvent.addListener((_) =>
+      browserController.selectTab(this.id)
     )
-    this.tab.addEventListener('click', this.tabClick.bind(this))
-    this.closeIconEl?.addEventListener('click', this.close.bind(this))
-  }
-
-  tabClick() {
-    browserController.selectTab(this.id)
-  }
-
-  setPageTitle() {
-    this.titleEl.innerHTML = this.title
+    this.tabView.closeTabEvent.addListener((_) =>
+      browserController.removeTab(this.id)
+    )
   }
 
   /**
    * @param {string} iconURL
-   * @param {string} originalURL
    */
-  setIcon(iconURL, originalURL) {
-    this.iconEl?.setAttribute('src', iconURL)
-  }
-
-  close() {
-    browserController.removeTab(this.id)
+  setIcon(iconURL) {
+    this.tabView.setIcon(iconURL)
   }
 
   /**
@@ -140,4 +105,154 @@ export class Tab {
   static createFromBrowser({ id, browser }) {
     return new Tab({ id, browser })
   }
+}
+
+class TabView {
+  /** @type {*} */
+  browser
+
+  /** @private */
+  tab =
+    /** @type {DocumentFragment} */
+    (tabTemplate?.content.cloneNode(true)).children[0]
+
+  /** @type {Event<{ newPageTitle: string }>} */
+  titleChangeEvent = new Event()
+
+  /** @type {Event<undefined>} */
+  tabFocusEvent = new Event()
+
+  /** @type {Event<undefined>} */
+  closeTabEvent = new Event()
+
+  constructor(browser) {
+    this.browser = browser
+    tabsContainer?.append(this.tab)
+  }
+
+  /**
+   * @private
+   * @returns {HTMLImageElement}
+   */
+  get iconElement() {
+    /** @type {*} */
+    const iconElement = this.tab.querySelector('.tab-icon')
+    return iconElement
+  }
+
+  /**
+   * @param {string} iconURL Sets the icon URL
+   */
+  setIcon(iconURL) {
+    this.iconElement.setAttribute('src', iconURL)
+  }
+
+  /**
+   * @private
+   * @returns {HTMLDivElement}
+   */
+  get titleElement() {
+    /** @type {*} */
+    const titleElement = this.tab.querySelector('.title')
+
+    return titleElement
+  }
+
+  /**
+   * @param {string} title The new tab title
+   */
+  setTitle(title) {
+    this.titleElement.innerText = title
+  }
+
+  /**
+   * @param {TabProgressListenerModel} model
+   */
+  connectTabProgressListenerModel(model) {
+    const filter = Cc[
+      '@mozilla.org/appshell/component/browser-status-filter;1'
+    ].createInstance(Ci.nsIWebProgress)
+    filter.addProgressListener(model, Ci.nsIWebProgress.NOTIFY_ALL)
+    this.browser.addProgressListener(filter, Ci.nsIWebProgress.NOTIFY_ALL)
+  }
+}
+
+export class TabModel {}
+
+export class TabProgressListenerModel {
+  /**
+   * @type {Event<{ location: nsIURIType }>}
+   */
+  locationChangeEvent = new Event()
+
+  QueryInterface = ChromeUtils.generateQI(['nsIWebProgressListener'])
+
+  /**
+   * Notification indicating the state has changed for one of the requests
+   * associated with aWebProgress.
+   *
+   * @param {nsIWebProgressType} aWebProgress
+   * The nsIWebProgress instance that fired the notification
+   * @param {nsIRequestType} aRequest
+   * The nsIRequest that has changed state.
+   * @param {unsigned_long} aStateFlags
+   * Flags indicating the new state.  This value is a combination of one
+   * of the State Transition Flags and one or more of the State Type
+   * Flags defined above.  Any undefined bits are reserved for future
+   * use.
+   * @param {nsresult} aStatus
+   * Error status code associated with the state change.  This parameter
+   * should be ignored unless aStateFlags includes the STATE_STOP bit.
+   * The status code indicates success or failure of the request
+   * associated with the state change.  NOTE: aStatus may be a success
+   * code even for server generated errors, such as the HTTP 404 error.
+   * In such cases, the request itself should be queried for extended
+   * error information (e.g., for HTTP requests see nsIHttpChannel).
+   */
+  onStateChange(aWebProgress, aRequest, aStateFlags, aStatus) {
+    console.log({ aWebProgress, aRequest, aStateFlags, aStatus })
+  }
+
+  onProgressChange(
+    aWebProgress,
+    aRequest,
+    aCurSelfProgress,
+    aMaxSelfProgress,
+    aCurTotalProgress,
+    aMaxTotalProgress
+  ) {}
+
+  /**
+   * Called when the location of the window being watched changes.  This is not
+   * when a load is requested, but rather once it is verified that the load is
+   * going to occur in the given window.  For instance, a load that starts in a
+   * window might send progress and status messages for the new site, but it
+   * will not send the onLocationChange until we are sure that we are loading
+   * this new page here.
+   *
+   * @param {nsIWebProgressType} aWebProgress
+   * The nsIWebProgress instance that fired the notification.
+   * @param {nsIRequestType} aRequest
+   * The associated nsIRequest.  This may be null in some cases.
+   * @param {nsIURIType} aLocation
+   * The URI of the location that is being loaded.
+   * @param {unsigned_long} aFlags
+   * This is a value which explains the situation or the reason why
+   * the location has changed.
+   */
+  onLocationChange(aWebProgress, aRequest, aLocation, aFlags) {
+    console.log('Location change', {
+      aWebProgress,
+      aRequest,
+      aLocation,
+      aFlags,
+    })
+    this.locationChangeEvent.trigger({ location: aLocation })
+  }
+
+  onStatusChange(aWebProgress, aRequest, aStatus, aMessage) {}
+
+  onSecurityChange(aWebProgress, aRequest, aState) {}
+
+  onContentBlockingEvent(aWebProgress, aRequest, aEvent) {}
 }

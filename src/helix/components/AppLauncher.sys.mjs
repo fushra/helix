@@ -15,7 +15,7 @@ export class AppLauncher {
   classID = Components.ID('{2bdc979f-d4da-4c22-8a05-8fc9dd37854d}')
 
   // nsISupports
-  QueryInterface = ChromeUtils.generateQI([nsICommandLineHandler])
+  QueryInterface = ChromeUtils.generateQI(['nsICommandLineHandler'])
 
   // nsICommandLineHandler
 
